@@ -1,6 +1,7 @@
 locals {
   # VPC - existing or new?
   vpc_id             = var.vpc_id == "" ? module.vpc.vpc_id : var.vpc_id
+  log_group_name     = var.log_group_name == "" ? var.name : var.log_group_name
   private_subnet_ids = coalescelist(module.vpc.private_subnets, var.private_subnet_ids, [""])
   public_subnet_ids  = coalescelist(module.vpc.public_subnets, var.public_subnet_ids, [""])
 
@@ -794,7 +795,7 @@ resource "aws_ecs_service" "atlantis" {
 # Cloudwatch logs
 ################################################################################
 resource "aws_cloudwatch_log_group" "atlantis" {
-  name              = var.name
+  name              = local.log_group_name
   retention_in_days = var.cloudwatch_log_retention_in_days
   kms_key_id        = var.cloudwatch_logs_kms_key_id
 

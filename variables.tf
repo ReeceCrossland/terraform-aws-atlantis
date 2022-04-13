@@ -700,3 +700,9 @@ variable "create_route53_aaaa_record" {
   type        = bool
   default     = false
 }
+
+variable "log_group_name" {
+  description = "Custom name for log group"
+  type        = string
+  default     = ""
+}
