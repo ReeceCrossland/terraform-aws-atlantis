@@ -446,6 +446,7 @@ resource "aws_efs_file_system" "this" {
   count = var.enable_ephemeral_storage ? 0 : 1
 
   creation_token = var.name
+  tags           = merge(local.tags, var.efs_tags)
 }
 
 resource "aws_efs_mount_target" "this" {
@@ -468,6 +469,8 @@ resource "aws_efs_access_point" "this" {
     gid = local.gid
     uid = local.uid
   }
+
+  tags = merge(local.tags, var.efs_tags)
 }
 
 ################################################################################

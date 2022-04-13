@@ -10,6 +10,12 @@ variable "internal" {
   default     = false
 }
 
+variable "efs_tags" {
+  description = "Additional tags to put on EFS resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "tags" {
   description = "A map of tags to use on all resources"
   type        = map(string)
