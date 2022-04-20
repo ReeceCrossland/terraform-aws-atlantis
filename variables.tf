@@ -595,6 +595,12 @@ variable "atlantis_gitlab_user_token" {
   default     = ""
 }
 
+variable "atlantis_github_hostname" {
+  description = "Github server hostname, defaults to github.com"
+  type        = string
+  default     = "github.com"
+}
+
 variable "atlantis_gitlab_hostname" {
   description = "Gitlab server hostname, defaults to gitlab.com"
   type        = string

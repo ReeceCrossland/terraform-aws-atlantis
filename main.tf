@@ -5,6 +5,9 @@ locals {
   private_subnet_ids = coalescelist(module.vpc.private_subnets, var.private_subnet_ids, [""])
   public_subnet_ids  = coalescelist(module.vpc.public_subnets, var.public_subnet_ids, [""])
 
+  version_control_hostname = var.atlantis_github_hostname != "github.com" ? var.atlantis_github_hostname : var.atlantis_gitlab_hostname
+  version_control_env_var  = var.atlantis_github_hostname != "github.com" ? "ATLANTIS_GH_HOSTNAME" : "ATLANTIS_GITLAB_HOSTNAME"
+
   # Atlantis
   atlantis_image = var.atlantis_image == "" ? "ghcr.io/runatlantis/atlantis:${var.atlantis_version}" : var.atlantis_image
   atlantis_url = "https://${coalesce(
@@ -40,8 +43,8 @@ locals {
       value = var.allow_repo_config
     },
     {
-      name  = "ATLANTIS_GITLAB_HOSTNAME"
-      value = var.atlantis_gitlab_hostname
+      name  = local.version_control_env_var
+      value = local.version_control_hostname
     },
     {
       name  = "ATLANTIS_LOG_LEVEL"
