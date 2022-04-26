@@ -299,6 +299,12 @@ variable "permissions_boundary" {
   default     = null
 }
 
+variable "execution_role_arn" {
+  description = "Optional execution IAM role ARN for the ECS Atlantis task"
+  type        = string
+  default     = ""
+}
+
 variable "policies_arn" {
   description = "A list of the ARN of the policies you want to apply"
   type        = list(string)

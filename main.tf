@@ -5,6 +5,11 @@ locals {
   private_subnet_ids = coalescelist(module.vpc.private_subnets, var.private_subnet_ids, [""])
   public_subnet_ids  = coalescelist(module.vpc.public_subnets, var.public_subnet_ids, [""])
 
+  execution_role_arn       = var.execution_role_arn == "" ? join("", aws_iam_role.ecs_task_execution.*.arn) : var.execution_role_arn
+  execution_role_id        = var.execution_role_arn == "" ? join("", aws_iam_role.ecs_task_execution.*.id) : split("/", local.execution_role_arn)[1]
+  execution_role_unique_id = var.execution_role_arn == "" ? join("", aws_iam_role.ecs_task_execution.*.unique_id) : split("/", local.execution_role_arn)[1]
+  execution_role_name      = var.execution_role_arn == "" ? join("", aws_iam_role.ecs_task_execution.*.name) : split("/", local.execution_role_arn)[1]
+
   # Atlantis
   atlantis_image = var.atlantis_image == "" ? "ghcr.io/runatlantis/atlantis:${var.atlantis_version}" : var.atlantis_image
   atlantis_url = "https://${coalesce(
@@ -521,6 +526,8 @@ data "aws_iam_policy_document" "ecs_tasks" {
 }
 
 resource "aws_iam_role" "ecs_task_execution" {
+  count = var.execution_role_arn == "" ? 1 : 0
+
   name                 = "${var.name}-ecs_task_execution"
   assume_role_policy   = data.aws_iam_policy_document.ecs_tasks.json
   permissions_boundary = var.permissions_boundary
@@ -531,7 +538,7 @@ resource "aws_iam_role" "ecs_task_execution" {
 resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   for_each = toset(local.policies_arn)
 
-  role       = aws_iam_role.ecs_task_execution.id
+  role       = local.execution_role_id
   policy_arn = each.value
 }
 
@@ -572,7 +579,7 @@ resource "aws_iam_role_policy" "ecs_task_access_secrets" {
 
   name = "ECSTaskAccessSecretsPolicy"
 
-  role = aws_iam_role.ecs_task_execution.id
+  role = local.execution_role_id
 
   policy = element(
     compact(
@@ -700,8 +707,8 @@ module "container_definition_bitbucket" {
 
 resource "aws_ecs_task_definition" "atlantis" {
   family                   = var.name
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  task_role_arn            = aws_iam_role.ecs_task_execution.arn
+  execution_role_arn       = local.execution_role_arn
+  task_role_arn            = local.execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.ecs_task_cpu
